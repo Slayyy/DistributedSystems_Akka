@@ -19,9 +19,16 @@ class ClientActor extends Actor {
     context.actorSelection(resolveServerActorPath(actorName)).tell(msg, context.self)
 
   override def receive: Receive = {
-    case rq: common.SearchRequest => tellServerActor("search", rq)
+    case rq: common.FindRequest => tellServerActor("find", rq)
     case rq: common.OrderRequest => tellServerActor("order", rq)
     case rq: common.ReadRequest => tellServerActor("read", rq)
+
+    case res: common.FindResponse => println(res.price match {
+      case Some(value) => println("%s %s".format(res.name, value.toString))
+      case None => println("%s not found".format(res.name))
+    })
+    case res: common.OrderResponse => println(res.result)
+
     case _ => log.info("Received unknown message")
   }
 }
@@ -33,12 +40,13 @@ object Client extends App {
   val client = system.actorOf(Props[ClientActor], "client")
 
   println("----------CLIENT READY----------")
-  for (line <- io.Source.stdin.getLines) {
+  io.Source.stdin.getLines.foreach((line) =>
       line.split(" ", 2) match {
-        case Array("search", args) => client ! common.SearchRequest(args)
+        case Array("find", args) => client ! common.FindRequest(args)
         case Array("order", args) => client ! common.OrderRequest(args)
         case Array("read", args) => client ! common.ReadRequest(args)
         case _ => println(s"Bad arg: $line")
       }
-  }
+  )
+
 }

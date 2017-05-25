@@ -1,8 +1,8 @@
 package common
 
-case class SearchRequest(name: String)
+case class FindRequest(name: String)
 case class OrderRequest(name: String)
 case class ReadRequest(name: String)
 
-case class SearchResponse(book: Array[String])
-case class OrderResponse(book: Boolean)
+case class FindResponse(name: String, price: Option[Integer])
+case class OrderResponse(result: String)
